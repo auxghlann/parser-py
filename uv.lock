@@ -3,6 +3,6 @@ revision = 1
 requires-python = ">=3.10"
 
 [[package]]
-name = "app"
+name = "ast-py"
 version = "0.1.0"
 source = { virtual = "." }
