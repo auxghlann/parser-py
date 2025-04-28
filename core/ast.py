@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Dict
 
 # =============================================================================
 # AST Node Class
@@ -21,6 +21,8 @@ class ASTNode:
         self.node_type = node_type
         self.children: List[ASTNode] = []  # List of child nodes
         self.value: Any = None #stores the value of the node
+        self.data_type: str = None # Store the data type of a node, if applicable
+        self.scope: Dict[str, str] = {} # Store the scope of the node
 
     def add_child(self, child: 'ASTNode'):
         """
@@ -37,4 +39,4 @@ class ASTNode:
          debugging and visualizing the tree structure.  It recursively
          displays the node type and its children.
         """
-        return f"{self.node_type}(value={self.value}, children={self.children})"
+        return f"{self.node_type}(value={self.value}, type={self.data_type}, children={self.children})"

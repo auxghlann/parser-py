@@ -27,7 +27,9 @@ def main():
     """
 
     code_1 = """
-    string str = "string";
+    int nums = 5;
+    string hello = "hello, world!";
+    
     """
 
     # Tokenize the code

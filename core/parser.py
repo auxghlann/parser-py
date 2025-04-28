@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 from core.ast import ASTNode
 # =============================================================================
 # Parser Class
@@ -9,7 +9,6 @@ class Parser:
     tokenizer and building an Abstract Syntax Tree (AST) that represents the
     structure of the program.
     """
-
     # Constants
     KEYWORDS = ['int', 'float', 'void', 'string']
 
@@ -24,6 +23,7 @@ class Parser:
         self.tokens = tokens
         self.cursor = 0
         self.current_token: Optional[Tuple[str, str]] = self.tokens[0] if self.tokens else None
+        self.global_scope: Dict[str, str] = {}  # Store variables and their types in the global scope
 
     def advance(self):
         """
@@ -70,6 +70,7 @@ class Parser:
             ASTNode: The AST node representing the program.
         """
         node = ASTNode('Program')
+        node.scope = self.global_scope #set the scope for program
         while self.current_token:
             statement_node = self.statement()
             node.add_child(statement_node)
@@ -97,7 +98,7 @@ class Parser:
             return self.while_statement()
         elif self.current_token[0] == 'KEYWORD' and self.current_token[1] == 'return':
             return self.return_statement()
-        elif self.current_token[0] == 'KEYWORD' and (self.current_token[1] in self.KEYWORDS):
+        elif self.current_token[0] == 'KEYWORD' and (self.current_token[1] in Parser.KEYWORDS):
             return self.declaration_statement()
         elif self.current_token[0] == 'OPERATOR' and self.current_token[1] == '{':
             return self.compound_statement()
@@ -189,6 +190,7 @@ class Parser:
         node = ASTNode('DeclarationStatement')
         type_specifier = self.type_specifier()  # return the type
         node.value = type_specifier
+        node.data_type = type_specifier #store the data type
 
         identifiers = []
         identifiers.append(self.consume('IDENTIFIER'))  # Consume the first identifier
@@ -201,12 +203,20 @@ class Parser:
         for identifier in identifiers:
             identifier_node = ASTNode("Identifier")
             identifier_node.value = identifier
+            identifier_node.data_type = type_specifier # Propagate the data type
             node.add_child(identifier_node)
+             # Check for duplicate declarations
+            if identifier in self.global_scope:
+                raise SyntaxError(f"Duplicate declaration of variable '{identifier}'")
+            self.global_scope[identifier] = type_specifier  # Store variable and its type
 
         if self.current_token and self.current_token[0] == 'OPERATOR' and self.current_token[1] == '=':
             self.advance()  # Consume '='
             expression_node = self.expression()
             node.add_child(expression_node)  # Add expression
+             # Type checking: Check if the expression type matches the declared variable type
+            if expression_node.data_type != type_specifier:
+                raise SyntaxError(f"Type mismatch in assignment for variable '{identifiers[0]}'")
         self.consume('OPERATOR')  # Consume ';'
         return node
 
@@ -214,7 +224,7 @@ class Parser:
         """
         Parses a type specifier.
 
-        type_specifier : 'int' | 'float' | 'void'
+        type_specifier : 'int' | 'float' | 'void' | 'string'
 
         Returns:
             str: The type specifier.
@@ -222,7 +232,7 @@ class Parser:
         Raises:
             SyntaxError: If the type specifier is invalid.
         """
-        if self.current_token and self.current_token[0] == 'KEYWORD' and self.current_token[1] in self.KEYWORDS:
+        if self.current_token and self.current_token[0] == 'KEYWORD' and self.current_token[1] in Parser.KEYWORDS:
             type_specifier = self.current_token[1]
             self.advance()
             return type_specifier
@@ -239,6 +249,7 @@ class Parser:
             ASTNode: The AST node representing the compound statement.
         """
         node = ASTNode('CompoundStatement')
+        node.scope = {} # Create new scope
         self.consume('OPERATOR')         # Consume '{'
         while self.current_token and self.current_token[0] != 'OPERATOR' or self.current_token[1] != '}':
             statement_node = self.statement()
@@ -273,6 +284,13 @@ class Parser:
             right = self.multiplicative_expression()
             node = ASTNode('BinaryOperator')
             node.value = op
+
+            # Type checking for binary operations
+            if left.data_type and right.data_type:
+                if left.data_type != right.data_type:
+                    raise SyntaxError(f"Type mismatch in additive expression: {left.data_type} {op} {right.data_type}")
+                node.data_type = left.data_type # Resulting type is the same as operands
+
             node.add_child(left)
             node.add_child(right)
             left = node
@@ -290,6 +308,11 @@ class Parser:
             right = self.primary_expression()
             node = ASTNode('BinaryOperator')
             node.value = op
+             # Type checking for binary operations
+            if left.data_type and right.data_type:
+                if left.data_type != right.data_type:
+                    raise SyntaxError(f"Type mismatch in multiplicative expression: {left.data_type} {op} {right.data_type}")
+                node.data_type = left.data_type
             node.add_child(left)
             node.add_child(right)
             left = node
@@ -303,18 +326,25 @@ class Parser:
         if self.current_token[0] == 'IDENTIFIER':
             node = ASTNode('Identifier')
             node.value = self.consume('IDENTIFIER')
+            #check if the variable is declared
+            if node.value not in self.global_scope:
+                raise SyntaxError(f"Undeclared variable '{node.value}'")
+            node.data_type = self.global_scope[node.value] #get the data type
             return node
         elif self.current_token[0] == 'INTEGER':
             node = ASTNode('IntegerLiteral')
             node.value = self.consume('INTEGER')
+            node.data_type = 'int'
             return node
         elif self.current_token[0] == 'FLOAT':
             node = ASTNode('FloatLiteral')
             node.value = self.consume('FLOAT')
+            node.data_type = 'float'
             return node
         elif self.current_token[0] == 'STRING':
             node = ASTNode('StringLiteral')
             node.value = self.consume('STRING')
+            node.data_type = 'string'
             return node
         elif self.current_token[0] == 'OPERATOR' and self.current_token[1] == '(':
             self.consume('OPERATOR')
