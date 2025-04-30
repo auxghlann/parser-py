@@ -41,8 +41,8 @@ class Tokenizer:
         patterns = [
             ('KEYWORD', r'\b(if|else|while|return|int|float|string|void)\b'),
             ('IDENTIFIER', r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'),
-            ('INTEGER', r'\b\d+\b'),
             ('FLOAT', r'\b\d+\.\d+\b'),
+            ('INTEGER', r'\b\d+\b'),
             ('OPERATOR', r'[+\-*/=<>!]=?|[;(){},\[\]+\-]'),  # Combine operators
             ('WHITESPACE', r'\s+'),  # Skip whitespace
             ('STRING', r'"[^"]*"'), #string
