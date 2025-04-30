@@ -40,3 +40,16 @@ class ASTNode:
          displays the node type and its children.
         """
         return f"{self.node_type}(value={self.value}, type={self.data_type}, children={self.children})"
+
+
+    def pretty_print(self, indent=0):
+        """
+        Recursively pretty prints the AST in a readable format.
+
+        Args:
+            indent (int): The current indentation level.
+        """
+        indent_str = "  " * indent
+        print(f"{indent_str}{self.node_type}(value={self.value}, type={self.data_type})")
+        for child in self.children:
+            child.pretty_print(indent + 1)

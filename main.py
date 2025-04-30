@@ -29,7 +29,7 @@ def main():
     code_1 = """
     int nums = 5;
     string hello = "hello, world!";
-    
+    float fl = 3.14;
     """
 
     # Tokenize the code
@@ -43,7 +43,7 @@ def main():
     parser = Parser(tokens)
     ast_root = parser.parse()
     print("\nAbstract Syntax Tree (AST):")
-    print(ast_root)  # Print the AST
+    ast_root.pretty_print()
 
 if __name__ == "__main__":
     main()
