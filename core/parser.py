@@ -83,6 +83,7 @@ class Parser:
         statement : expression_statement
                   | if_statement
                   | while_statement
+                  | for_statement
                   | return_statement
                   | declaration_statement
                   | compound_statement
@@ -94,8 +95,13 @@ class Parser:
             return ASTNode("EmptyStatement") #handle empty
         if self.current_token[0] == 'KEYWORD' and self.current_token[1] == 'if':
             return self.if_statement()
+        elif self.current_token[0] == 'KEYWORD' and self.current_token[1] == 'else':
+            # Handle 'else' as part of an invalid context
+            raise SyntaxError("Unexpected 'else' without matching 'if'")
         elif self.current_token[0] == 'KEYWORD' and self.current_token[1] == 'while':
             return self.while_statement()
+        elif self.current_token[0] == 'KEYWORD' and self.current_token[1] == 'for':
+            return self.for_statement() 
         elif self.current_token[0] == 'KEYWORD' and self.current_token[1] == 'return':
             return self.return_statement()
         elif self.current_token[0] == 'KEYWORD' and (self.current_token[1] in Parser.KEYWORDS):
@@ -104,7 +110,9 @@ class Parser:
             return self.compound_statement()
         else:
             return self.expression_statement()
+        
 
+    ## Statement Helper Functions
     def expression_statement(self) -> ASTNode:
         """
         Parses an expression statement.
@@ -140,7 +148,7 @@ class Parser:
         node.add_child(then_statement)    # Add then statement
 
         if self.current_token and self.current_token[0] == 'KEYWORD' and self.current_token[1] == 'else':
-            self.advance()                # Consume 'else'
+            self.consume('KEYWORD')       # Consume 'else'
             else_statement = self.statement()
             node.add_child(else_statement)  # Add else statement
         return node
@@ -162,6 +170,39 @@ class Parser:
         self.consume('OPERATOR')         # Consume ')'
         loop_statement = self.statement()
         node.add_child(loop_statement)    # Add loop statement
+        return node
+    
+    def for_statement(self) -> ASTNode:
+        """
+        Parses a for statement.
+
+        for_statement : 'for' '(' declaration_statement ';' expression ';' counter ')' statement
+
+        Returns:
+            ASTNode: The AST node representing the for statement.
+        """
+        node = ASTNode('ForStatement')
+        self.consume('KEYWORD')  # Consume 'for'
+        self.consume('OPERATOR')  # Consume '('
+
+        # Parse the declaration statement
+        declaration_node = self.declaration_statement()
+        node.add_child(declaration_node)
+
+        # Parse the expression (formerly condition)
+        expression_node = self.expression()
+        node.add_child(expression_node)
+        self.consume('OPERATOR')  # Consume ';'
+
+        # Parse the counter (e.g., increment or decrement)
+        counter_node = self.expression()
+        node.add_child(counter_node)
+        self.consume('OPERATOR')  # Consume ')'
+
+        # Parse the body of the for loop
+        body_node = self.statement()
+        node.add_child(body_node)
+
         return node
 
     def return_statement(self) -> ASTNode:
@@ -259,19 +300,86 @@ class Parser:
 
     def expression(self) -> ASTNode:
         """
-        Parses an expression.  This is a placeholder for a more complex
-        expression parsing logic.  For now, it just handles identifiers,
-        integers, and floats.
+        Parses an expression.
 
-        expression : term ( ('+' | '-') term )*
-        term       : factor ( ('*' | '/') factor )*
-        factor     : IDENTIFIER | INTEGER | FLOAT | '(' expression ')'
+        expression : logical_or_expression
 
         Returns:
             ASTNode: The AST node representing the expression.
         """
-        return self.additive_expression()
+        return self.logical_or_expression()
+    
+    def logical_or_expression(self) -> ASTNode:
+        """
+        Parses logical OR expressions.
 
+        logical_or_expression : logical_and_expression ( '||' logical_and_expression )*
+        """
+        left = self.logical_and_expression()
+        while self.current_token and self.current_token[0] == 'OPERATOR' and self.current_token[1] == '||':
+            op = self.consume('OPERATOR')
+            right = self.logical_and_expression()
+            node = ASTNode('LogicalOperator')
+            node.value = op
+            node.data_type = 'bool'  # Logical operations result in boolean type
+            node.add_child(left)
+            node.add_child(right)
+            left = node
+        return left
+
+    def logical_and_expression(self) -> ASTNode:
+        """
+        Parses logical AND expressions.
+
+        logical_and_expression : equality_expression ( '&&' equality_expression )*
+        """
+        left = self.equality_expression()
+        while self.current_token and self.current_token[0] == 'OPERATOR' and self.current_token[1] == '&&':
+            op = self.consume('OPERATOR')
+            right = self.equality_expression()
+            node = ASTNode('LogicalOperator')
+            node.value = op
+            node.data_type = 'bool'
+            node.add_child(left)
+            node.add_child(right)
+            left = node
+        return left
+
+    def equality_expression(self) -> ASTNode:
+        """
+        Parses equality expressions.
+
+        equality_expression : relational_expression ( ('==' | '!=') relational_expression )*
+        """
+        left = self.relational_expression()
+        while self.current_token and self.current_token[0] == 'OPERATOR' and self.current_token[1] in ('==', '!='):
+            op = self.consume('OPERATOR')
+            right = self.relational_expression()
+            node = ASTNode('EqualityOperator')
+            node.value = op
+            node.data_type = 'bool'
+            node.add_child(left)
+            node.add_child(right)
+            left = node
+        return left
+
+    def relational_expression(self) -> ASTNode:
+        """
+        Parses relational expressions.
+
+        relational_expression : additive_expression ( ('<' | '>' | '<=' | '>=') additive_expression )*
+        """
+        left = self.additive_expression()
+        while self.current_token and self.current_token[0] == 'OPERATOR' and self.current_token[1] in ('<', '>', '<=', '>='):
+            op = self.consume('OPERATOR')
+            right = self.additive_expression()
+            node = ASTNode('RelationalOperator')
+            node.value = op
+            node.data_type = 'bool'
+            node.add_child(left)
+            node.add_child(right)
+            left = node
+        return left
     def additive_expression(self) -> ASTNode:
         """
         Parses additive expressions.
@@ -321,15 +429,23 @@ class Parser:
     def primary_expression(self) -> ASTNode:
         """
         Parses primary expressions.
-        primary_expression : IDENTIFIER | INTEGER | FLOAT | STRING | '(' expression ')'
+
+        primary_expression : IDENTIFIER | INTEGER | FLOAT | STRING | '(' expression ')' | '!' primary_expression
         """
-        if self.current_token[0] == 'IDENTIFIER':
+        if self.current_token[0] == 'OPERATOR' and self.current_token[1] == '!':
+            self.consume('OPERATOR')  # Consume '!'
+            operand = self.primary_expression()
+            node = ASTNode('LogicalNot')
+            node.value = '!'
+            node.data_type = 'bool'
+            node.add_child(operand)
+            return node
+        elif self.current_token[0] == 'IDENTIFIER':
             node = ASTNode('Identifier')
             node.value = self.consume('IDENTIFIER')
-            #check if the variable is declared
             if node.value not in self.global_scope:
                 raise SyntaxError(f"Undeclared variable '{node.value}'")
-            node.data_type = self.global_scope[node.value] #get the data type
+            node.data_type = self.global_scope[node.value]
             return node
         elif self.current_token[0] == 'INTEGER':
             node = ASTNode('IntegerLiteral')
@@ -347,9 +463,9 @@ class Parser:
             node.data_type = 'string'
             return node
         elif self.current_token[0] == 'OPERATOR' and self.current_token[1] == '(':
-            self.consume('OPERATOR')
+            self.consume('OPERATOR')  # Consume '('
             node = self.expression()
-            self.consume('OPERATOR')
+            self.consume('OPERATOR')  # Consume ')'
             return node
         else:
             raise SyntaxError(f"Invalid expression: {self.current_token}")

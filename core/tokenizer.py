@@ -37,15 +37,14 @@ class Tokenizer:
             return None  # End of input
 
         # Define token patterns using regular expressions.
-        # Order is important!  Longer matches should come first.
         patterns = [
-            ('KEYWORD', r'\b(if|else|while|return|int|float|string|void)\b'),
+            ('KEYWORD', r'\b(if|else|while|for|int|float|string|void|return)\b'),
             ('IDENTIFIER', r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'),
             ('FLOAT', r'\b\d+\.\d+\b'),
             ('INTEGER', r'\b\d+\b'),
-            ('OPERATOR', r'[+\-*/=<>!]=?|[;(){},\[\]+\-]'),  # Combine operators
-            ('WHITESPACE', r'\s+'),  # Skip whitespace
-            ('STRING', r'"[^"]*"'), #string
+            ('OPERATOR', r'(\|\||&&|==|!=|<=|>=|[+\-*/=<>!;(){},\[\]])'),  
+            ('WHITESPACE', r'\s+'),  
+            ('STRING', r'"[^"]*"'),  
         ]
 
         # Iterate through the patterns to find a match at the current position.
@@ -60,7 +59,7 @@ class Tokenizer:
                 else:
                     return self.get_next_token() # continue to get next token
         # If no pattern matches, raise an error for an unexpected character.
-        # Include the current cursor position in the error message.
+            ## Include the current cursor position in the error message.
         raise ValueError(f"Unexpected character '{self.text[self.cursor]}' at position {self.cursor}")
 
     def tokenize(self) -> List[Tuple[str, str]]:
