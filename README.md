@@ -1,19 +1,88 @@
-# A Parser Framework Using Python
-By: Allan Khester Mesa BSCS 3_A10
+## Programming Language Grammar (EBNF)
+*By: Allan Khester Mesa BSCS 3_A10*
 
-## Programming Language Grammar
 
 This documentation outlines the grammar rules supported by the parser framework. Each rule defines the structure of valid programs, statements, and expressions in the language.
 
 ---
 
-### 1. Program
+### 1. Lexical Structure
+
+The lexical structure defines the basic building blocks of the programming language, such as literals, identifiers, keywords, and operators.
+
+#### 1.1 Identifiers
+```txt
+IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]*
+```
+- **Description**: Identifiers are names used for variables, functions, and other user-defined elements. They must start with a letter or underscore and can be followed by letters, digits, or underscores.
+- **Example**:
+  ```c
+  myVariable
+  _temp
+  count123
+  ```
+
+#### 1.2 Integer Literals
+```txt
+INTEGER : [0-9]+
+```
+- **Description**: Integer literals are sequences of digits representing whole numbers.
+- **Example**:
+  ```c
+  42
+  0
+  123456
+  ```
+
+#### 1.3 Float Literals
+```txt
+FLOAT : [0-9]+\.[0-9]+
+```
+- **Description**: Float literals are numbers with a decimal point, representing real numbers.
+- **Example**:
+  ```c
+  3.14
+  0.001
+  123.456
+  ```
+
+#### 1.4 String Literals
+```txt
+STRING : "[^"]*"
+```
+- **Description**: String literals are sequences of characters enclosed in double quotes.
+- **Example**:
+  ```c
+  "Hello, World!"
+  "123"
+  "This is a string."
+  ```
+
+
+#### 1.5 Operators
+```txt
+OPERATOR : || | && | == | != | <= | >= | [+\-*/=<>!;(){},\[\]]
+```
+- **Description**: Operators include arithmetic, logical, relational, and other symbols used in expressions and statements.
+- **Example**:
+  ```c
+  +
+  -
+  *
+  /
+  &&
+  ||
+  ==
+  !=
+  ```
+
+### 2. Program
 ```txt
 program : statement*
 ```
 - **Description**: A program consists of zero or more statements.
 
-### 2. Statements
+### 3. Statements
 ```txt
 statement : expression_statement
           | if_statement
@@ -25,7 +94,7 @@ statement : expression_statement
 ```
 - **Description**: A statement can be one of several types, including expressions, control flow constructs, or declarations.
 
-#### 2.1 Expression Statement
+#### 3.1 Expression Statement
 ```txt
 expression_statement : expression ';'
 ```
@@ -35,7 +104,7 @@ expression_statement : expression ';'
   x = x + 1;
   ```
 
-#### 2.2 If Statement
+#### 3.2 If Statement
 ```txt
 if_statement : 'if' '(' expression ')' statement
              | 'if' '(' expression ')' statement 'else' statement
@@ -50,7 +119,7 @@ if_statement : 'if' '(' expression ')' statement
   }
   ```
 
-#### 2.3 While Statement
+#### 3.3 While Statement
 ```txt
 while_statement : 'while' '(' expression ')' statement
 ```
@@ -62,7 +131,7 @@ while_statement : 'while' '(' expression ')' statement
   }
   ```
 
-#### 2.4 For Statement
+#### 3.4 For Statement
 ```txt
 for_statement : 'for' '(' declaration_statement ';' expression ';' counter ')' statement
 ```
@@ -74,17 +143,7 @@ for_statement : 'for' '(' declaration_statement ';' expression ';' counter ')' s
   }
   ```
 
-#### 2.5 Return Statement
-```txt
-return_statement : 'return' expression? ';'
-```
-- **Description**: A statement that exits a function and optionally returns a value.
-- **Example**:
-  ```c
-  return x + y;
-  ```
-
-#### 2.6 Declaration Statement
+#### 3.5 Declaration Statement
 ```txt
 declaration_statement : type_specifier IDENTIFIER (',' IDENTIFIER)* ( '=' expression )? ';'
 ```
@@ -95,7 +154,7 @@ declaration_statement : type_specifier IDENTIFIER (',' IDENTIFIER)* ( '=' expres
   string message = "Hello, World!";
   ```
 
-#### 2.7 Compound Statement
+#### 3.6 Compound Statement
 ```txt
 compound_statement : '{' statement* '}'
 ```
@@ -110,9 +169,9 @@ compound_statement : '{' statement* '}'
 
 ---
 
-### 3. Type Specifier
+### 4. Type Specifier
 ```txt
-type_specifier : 'int' | 'float' | 'void' | 'string'
+type_specifier : 'int' | 'float' | 'string'
 ```
 - **Description**: Specifies the type of a variable or function.
 - **Example**:
@@ -124,13 +183,15 @@ type_specifier : 'int' | 'float' | 'void' | 'string'
 
 ---
 
-### 4. Expressions
+**Note: the parsing of these expression must be in order to achieve precedence and associativity**
+
+### 5. Expressions
 ```txt
 expression : logical_or_expression
 ```
 - **Description**: An expression is a combination of variables, literals, and operators that evaluates to a value.
 
-#### 4.1 Logical OR Expression
+#### 5.1 Logical OR Expression
 ```txt
 logical_or_expression : logical_and_expression ( '||' logical_and_expression )*
 ```
@@ -140,7 +201,7 @@ logical_or_expression : logical_and_expression ( '||' logical_and_expression )*
   x > 5 || y < 10
   ```
 
-#### 4.2 Logical AND Expression
+#### 5.2 Logical AND Expression
 ```txt
 logical_and_expression : equality_expression ( '&&' equality_expression )*
 ```
@@ -150,7 +211,7 @@ logical_and_expression : equality_expression ( '&&' equality_expression )*
   x > 5 && y < 10
   ```
 
-#### 4.3 Equality Expression
+#### 5.3 Equality Expression
 ```txt
 equality_expression : relational_expression ( ('==' | '!=') relational_expression )*
 ```
@@ -161,7 +222,7 @@ equality_expression : relational_expression ( ('==' | '!=') relational_expressio
   x != y
   ```
 
-#### 4.4 Relational Expression
+#### 5.4 Relational Expression
 ```txt
 relational_expression : additive_expression ( ('<' | '>' | '<=' | '>=') additive_expression )*
 ```
@@ -172,7 +233,7 @@ relational_expression : additive_expression ( ('<' | '>' | '<=' | '>=') additive
   x >= 10
   ```
 
-#### 4.5 Additive Expression
+#### 5.5 Additive Expression
 ```txt
 additive_expression : multiplicative_expression ( ('+' | '-') multiplicative_expression )*
 ```
@@ -183,7 +244,7 @@ additive_expression : multiplicative_expression ( ('+' | '-') multiplicative_exp
   x - 5
   ```
 
-#### 4.6 Multiplicative Expression
+#### 5.6 Multiplicative Expression
 ```txt
 multiplicative_expression : primary_expression ( ('*' | '/') primary_expression )*
 ```
@@ -194,7 +255,7 @@ multiplicative_expression : primary_expression ( ('*' | '/') primary_expression 
   x / 2
   ```
 
-#### 4.7 Primary Expression
+#### 5.7 Primary Expression
 ```txt
 primary_expression : IDENTIFIER | INTEGER | FLOAT | STRING | '(' expression ')' | '!' primary_expression
 ```
