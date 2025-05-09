@@ -55,7 +55,7 @@ class Tokenizer:
                 value = match.group(0)  # Extract the matched text
                 self.cursor = match.end()  # Advance the cursor
                 if token_type != 'WHITESPACE':  # Discard whitespace
-                    return (token_type, value)
+                    return (token_type, value) # return the token Type and its actual value
                 else:
                     return self.get_next_token() # continue to get next token
         # If no pattern matches, raise an error for an unexpected character.
