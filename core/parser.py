@@ -205,22 +205,22 @@ class Parser:
 
         return node
 
-    def return_statement(self) -> ASTNode:
-        """
-        Parses a return statement.
+    # def return_statement(self) -> ASTNode:
+    #     """
+    #     Parses a return statement.
 
-        return_statement : 'return' expression? ';'
+    #     return_statement : 'return' expression? ';'
 
-        Returns:
-            ASTNode: The AST node representing the return statement.
-        """
-        node = ASTNode('ReturnStatement')
-        self.consume('KEYWORD')         # Consume 'return'
-        if self.current_token and self.current_token[0] != 'OPERATOR' or self.current_token[1] != ';':
-            expression_node = self.expression()
-            node.add_child(expression_node) # Add expression
-        self.consume('OPERATOR')         # Consume ';'
-        return node
+    #     Returns:
+    #         ASTNode: The AST node representing the return statement.
+    #     """
+    #     node = ASTNode('ReturnStatement')
+    #     self.consume('KEYWORD')         # Consume 'return'
+    #     if self.current_token and self.current_token[0] != 'OPERATOR' or self.current_token[1] != ';':
+    #         expression_node = self.expression()
+    #         node.add_child(expression_node) # Add expression
+    #     self.consume('OPERATOR')         # Consume ';'
+    #     return node
 
     def declaration_statement(self) -> ASTNode:
         """
