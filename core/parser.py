@@ -309,6 +309,8 @@ class Parser:
         """
         return self.logical_or_expression()
     
+
+    ## Expression Helper Functions
     def logical_or_expression(self) -> ASTNode:
         """
         Parses logical OR expressions.
