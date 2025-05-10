@@ -271,6 +271,6 @@ primary_expression : IDENTIFIER | INTEGER | FLOAT | STRING | '(' expression ')' 
 
 ---
 
-### Notes
+### Grammar Feature
 - **Operator Precedence**: The grammar ensures that operators are parsed in the correct order of precedence (e.g., `*` and `/` have higher precedence than `+` and `-`).
 - **Type Checking**: The parser performs type checking to ensure that operations are valid for the given types (e.g., you cannot add a string to an integer).
