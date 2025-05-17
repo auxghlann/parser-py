@@ -10,7 +10,7 @@ class Parser:
     structure of the program.
     """
     # Constants
-    KEYWORDS = ['int', 'float', 'void', 'string']
+    TYPE_KEYWORDS = ['int', 'float', 'void', 'string']
 
     def __init__(self, tokens: List[Tuple[str, str]]):
         """
@@ -104,7 +104,7 @@ class Parser:
             return self.for_statement() 
         elif self.current_token[0] == 'KEYWORD' and self.current_token[1] == 'return':
             return self.return_statement()
-        elif self.current_token[0] == 'KEYWORD' and (self.current_token[1] in Parser.KEYWORDS):
+        elif self.current_token[0] == 'KEYWORD' and (self.current_token[1] in Parser.TYPE_KEYWORDS):
             return self.declaration_statement()
         elif self.current_token[0] == 'OPERATOR' and self.current_token[1] == '{':
             return self.compound_statement()
