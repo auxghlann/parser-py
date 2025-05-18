@@ -10,7 +10,9 @@ class Parser:
     structure of the program.
     """
     # Constants
-    TYPE_KEYWORDS = ['int', 'float', 'void', 'string']
+
+    # TYPE_KEYWORDS = ['int', 'float', 'void', 'string']
+    TYPE_KEYWORDS = ['int', 'float', 'string']
 
     def __init__(self, tokens: List[Tuple[str, str]]):
         """
@@ -33,7 +35,7 @@ class Parser:
         if self.cursor < len(self.tokens):
             self.current_token = self.tokens[self.cursor]
         else:
-            self.current_token = None  # End of tokens
+            self.current_token = None  # End of tokens 
 
     def consume(self, expected_type: str) -> str:
         """
@@ -41,7 +43,7 @@ class Parser:
 
         If the token matches, it advances to the next token and returns the
         token's value.  If it doesn't match, it raises a SyntaxError.
-
+        
         Args:
             expected_type (str): The expected type of the token.
 
@@ -236,11 +238,12 @@ class Parser:
         identifiers = []
         identifiers.append(self.consume('IDENTIFIER'))  # Consume the first identifier
 
+        # Check for additional identifiers separated by commas
         while self.current_token and self.current_token[0] == 'OPERATOR' and self.current_token[1] == ',':
             self.advance()  # Consume ','
             identifiers.append(self.consume('IDENTIFIER'))  # Consume subsequent identifiers
 
-        # Create Identifier nodes for each identifier
+        # Create Identifier nodes for each identifier (e.g., int x, y, z)
         for identifier in identifiers:
             identifier_node = ASTNode("Identifier")
             identifier_node.value = identifier
@@ -273,11 +276,11 @@ class Parser:
         Raises:
             SyntaxError: If the type specifier is invalid.
         """
-        if self.current_token and self.current_token[0] == 'KEYWORD' and self.current_token[1] in Parser.KEYWORDS:
+        if self.current_token and self.current_token[0] == 'KEYWORD' and self.current_token[1] in Parser.TYPE_KEYWORDS:
             type_specifier = self.current_token[1]
             self.advance()
             return type_specifier
-        else:
+        else: 
             raise SyntaxError("Invalid type specifier")
 
     def compound_statement(self) -> ASTNode:
@@ -382,6 +385,7 @@ class Parser:
             node.add_child(right)
             left = node
         return left
+    
     def additive_expression(self) -> ASTNode:
         """
         Parses additive expressions.
@@ -393,7 +397,7 @@ class Parser:
             self.consume('OPERATOR')
             right = self.multiplicative_expression()
             node = ASTNode('BinaryOperator')
-            node.value = op
+            node.value = op 
 
             # Type checking for binary operations
             if left.data_type and right.data_type:

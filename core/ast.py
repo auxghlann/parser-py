@@ -35,8 +35,7 @@ class ASTNode:
 
     def __repr__(self):
         """
-         Returns a string representation of the AST node.  This is useful for
-         debugging and visualizing the tree structure.  It recursively
+         Returns a string representation of the AST node. It recursively
          displays the node type and its children.
         """
         return f"{self.node_type}(value={self.value}, type={self.data_type}, children={self.children})"

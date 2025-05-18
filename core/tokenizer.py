@@ -21,6 +21,23 @@ class Tokenizer:
         self.cursor = 0
         self.tokens: List[Tuple[str, str]] = []  # List of (token_type, token_value)
 
+    def tokenize(self) -> List[Tuple[str, str]]:
+        """
+        Tokenizes the entire input text.
+
+        Repeatedly calls get_next_token() until the end of the input is reached,
+        collecting all the tokens into a list.
+
+        Returns:
+            List[Tuple[str, str]]: A list of (token_type, token_value) tuples.
+        """
+        while True:
+            token = self.get_next_token()
+            if token is None:
+                break  # Exit loop at end of input
+            self.tokens.append(token)
+        return self.tokens
+    
     def get_next_token(self) -> Optional[Tuple[str, str]]:
         """
         Extracts the next token from the input text.
@@ -62,19 +79,4 @@ class Tokenizer:
             ## Include the current cursor position in the error message.
         raise ValueError(f"Unexpected character '{self.text[self.cursor]}' at position {self.cursor}")
 
-    def tokenize(self) -> List[Tuple[str, str]]:
-        """
-        Tokenizes the entire input text.
-
-        Repeatedly calls get_next_token() until the end of the input is reached,
-        collecting all the tokens into a list.
-
-        Returns:
-            List[Tuple[str, str]]: A list of (token_type, token_value) tuples.
-        """
-        while True:
-            token = self.get_next_token()
-            if token is None:
-                break  # Exit loop at end of input
-            self.tokens.append(token)
-        return self.tokens
+    
